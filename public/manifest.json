@@ -1,0 +1,15 @@
+{
+  "name": "Trading Log",
+  "short_name": "Trading Log",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#16171d",
+  "theme_color": "#aa3bff",
+  "icons": [
+    {
+      "src": "favicon.svg",
+      "type": "image/svg+xml",
+      "sizes": "any"
+    }
+  ]
+}
