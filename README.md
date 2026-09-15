@@ -56,10 +56,20 @@ If you rename the repository, update the `base` path in `vite.config.ts` to matc
 ## Notes on the data model
 
 Each trade stores: date, time, symbol, direction (long/short), position size,
-entry/exit price, stop loss, take profit, risk amount ($), fees, and realized
-P&L ($). R-multiple (P&L ÷ risk) is computed in the app, not stored, so it's
-always consistent with whatever you edit.
+entry/exit price, stop loss, take profit, risk amount ($), and realized P&L
+($). R-multiple (P&L ÷ risk) is computed in the app, not stored, so it's
+always consistent with whatever you edit. Trades can be edited or deleted
+after logging (tap the pencil/× on a trade card).
 
 This is intentionally a small, personal-scope v1 — no shared/multi-user
 features, no broker integration. Easy things to add later: trade notes/tags,
-CSV export, editing an existing trade (currently: delete and re-log).
+CSV export.
+
+## Updating an already-deployed database
+
+If you already ran `schema.sql` against a live Supabase project before the
+`fees` column was removed, drop it manually once in the SQL Editor:
+
+```sql
+alter table trades drop column if exists fees;
+```

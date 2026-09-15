@@ -17,6 +17,7 @@ function App() {
   const [tradesLoading, setTradesLoading] = useState(false)
   const [tab, setTab] = useState<Tab>('log')
   const [showForm, setShowForm] = useState(false)
+  const [editingTrade, setEditingTrade] = useState<Trade | null>(null)
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
@@ -58,27 +59,32 @@ function App() {
       </header>
 
       <main className="app-main">
-        {showForm ? (
+        {showForm || editingTrade ? (
           <TradeForm
             userId={session.user.id}
+            trade={editingTrade ?? undefined}
             onSaved={() => {
               setShowForm(false)
+              setEditingTrade(null)
               loadTrades()
             }}
-            onCancel={() => setShowForm(false)}
+            onCancel={() => {
+              setShowForm(false)
+              setEditingTrade(null)
+            }}
           />
         ) : tab === 'log' ? (
           tradesLoading ? (
             <p className="empty-state">Loading trades…</p>
           ) : (
-            <TradeList trades={trades} onChanged={loadTrades} />
+            <TradeList trades={trades} onChanged={loadTrades} onEdit={setEditingTrade} />
           )
         ) : (
           <Analytics trades={trades} />
         )}
       </main>
 
-      {!showForm && (
+      {!showForm && !editingTrade && (
         <nav className="bottom-nav">
           <button className={tab === 'log' ? 'active' : ''} onClick={() => setTab('log')}>
             Log

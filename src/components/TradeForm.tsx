@@ -1,13 +1,14 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
 import { supabase } from '../lib/supabase'
-import type { Direction } from '../types'
+import type { Direction, Trade } from '../types'
 
 const todayISO = () => new Date().toISOString().slice(0, 10)
 const nowHM = () => new Date().toTimeString().slice(0, 5)
 
 interface Props {
   userId: string
+  trade?: Trade
   onSaved: () => void
   onCancel: () => void
 }
@@ -23,11 +24,12 @@ interface FormState {
   stop_loss: string
   take_profit: string
   risk_amount: string
-  fees: string
   realized_pnl: string
 }
 
-const emptyForm: FormState = {
+const numToStr = (v: number | null) => (v == null ? '' : String(v))
+
+const emptyForm = (): FormState => ({
   trade_date: todayISO(),
   trade_time: nowHM(),
   symbol: '',
@@ -38,14 +40,28 @@ const emptyForm: FormState = {
   stop_loss: '',
   take_profit: '',
   risk_amount: '',
-  fees: '',
   realized_pnl: '',
-}
+})
+
+const formFromTrade = (t: Trade): FormState => ({
+  trade_date: t.trade_date,
+  trade_time: t.trade_time ?? '',
+  symbol: t.symbol,
+  direction: t.direction,
+  position_size: numToStr(t.position_size),
+  entry_price: numToStr(t.entry_price),
+  exit_price: numToStr(t.exit_price),
+  stop_loss: numToStr(t.stop_loss),
+  take_profit: numToStr(t.take_profit),
+  risk_amount: numToStr(t.risk_amount),
+  realized_pnl: numToStr(t.realized_pnl),
+})
 
 const toNumber = (v: string): number | null => (v.trim() === '' ? null : Number(v))
 
-export function TradeForm({ userId, onSaved, onCancel }: Props) {
-  const [form, setForm] = useState<FormState>(emptyForm)
+export function TradeForm({ userId, trade, onSaved, onCancel }: Props) {
+  const isEdit = trade != null
+  const [form, setForm] = useState<FormState>(trade ? formFromTrade(trade) : emptyForm())
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -61,8 +77,7 @@ export function TradeForm({ userId, onSaved, onCancel }: Props) {
     setSaving(true)
     setError(null)
 
-    const { error: insertError } = await supabase.from('trades').insert({
-      user_id: userId,
+    const payload = {
       trade_date: form.trade_date,
       trade_time: form.trade_time || null,
       symbol: form.symbol.trim().toUpperCase(),
@@ -73,22 +88,24 @@ export function TradeForm({ userId, onSaved, onCancel }: Props) {
       stop_loss: toNumber(form.stop_loss),
       take_profit: toNumber(form.take_profit),
       risk_amount: toNumber(form.risk_amount),
-      fees: toNumber(form.fees),
       realized_pnl: toNumber(form.realized_pnl),
-    })
+    }
+
+    const { error: saveError } = isEdit
+      ? await supabase.from('trades').update(payload).eq('id', trade.id)
+      : await supabase.from('trades').insert({ ...payload, user_id: userId })
 
     setSaving(false)
-    if (insertError) {
-      setError(insertError.message)
+    if (saveError) {
+      setError(saveError.message)
       return
     }
-    setForm(emptyForm)
     onSaved()
   }
 
   return (
     <form className="trade-form" onSubmit={handleSubmit}>
-      <h2>Log a trade</h2>
+      <h2>{isEdit ? 'Edit trade' : 'Log a trade'}</h2>
 
       <div className="field-row">
         <label>
@@ -119,7 +136,7 @@ export function TradeForm({ userId, onSaved, onCancel }: Props) {
             value={form.symbol}
             onChange={(e) => set('symbol', e.target.value)}
             required
-            autoFocus
+            autoFocus={!isEdit}
           />
         </label>
         <label>
@@ -201,16 +218,6 @@ export function TradeForm({ userId, onSaved, onCancel }: Props) {
       </div>
 
       <div className="field-row">
-        <label>
-          Fees ($)
-          <input
-            type="number"
-            step="any"
-            inputMode="decimal"
-            value={form.fees}
-            onChange={(e) => set('fees', e.target.value)}
-          />
-        </label>
         <label className="grow">
           Realized P&amp;L ($)
           <input
@@ -230,7 +237,7 @@ export function TradeForm({ userId, onSaved, onCancel }: Props) {
           Cancel
         </button>
         <button type="submit" disabled={saving}>
-          {saving ? 'Saving…' : 'Save trade'}
+          {saving ? 'Saving…' : isEdit ? 'Save changes' : 'Save trade'}
         </button>
       </div>
     </form>

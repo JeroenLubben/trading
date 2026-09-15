@@ -5,12 +5,13 @@ import type { Trade } from '../types'
 interface Props {
   trades: Trade[]
   onChanged: () => void
+  onEdit: (trade: Trade) => void
 }
 
 const fmtMoney = (v: number | null) =>
   v == null ? '—' : `${v < 0 ? '-' : ''}$${Math.abs(v).toFixed(2)}`
 
-export function TradeList({ trades, onChanged }: Props) {
+export function TradeList({ trades, onChanged, onEdit }: Props) {
   const handleDelete = async (id: string) => {
     if (!confirm('Delete this trade?')) return
     const { error } = await supabase.from('trades').delete().eq('id', id)
@@ -48,9 +49,14 @@ export function TradeList({ trades, onChanged }: Props) {
               <span className={pnlClass}>{fmtMoney(t.realized_pnl)}</span>
               {r != null && <span className="r-badge">{r.toFixed(2)}R</span>}
             </div>
-            <button className="delete-btn" onClick={() => handleDelete(t.id)} aria-label="Delete trade">
-              ×
-            </button>
+            <div className="card-actions">
+              <button className="icon-btn" onClick={() => onEdit(t)} aria-label="Edit trade">
+                ✎
+              </button>
+              <button className="icon-btn" onClick={() => handleDelete(t.id)} aria-label="Delete trade">
+                ×
+              </button>
+            </div>
           </li>
         )
       })}

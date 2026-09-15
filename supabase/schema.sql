@@ -13,7 +13,6 @@ create table if not exists trades (
   stop_loss numeric,
   take_profit numeric,
   risk_amount numeric,
-  fees numeric,
   realized_pnl numeric,
   created_at timestamptz not null default now()
 );

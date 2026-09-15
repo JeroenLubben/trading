@@ -182,7 +182,7 @@
   border: 1px solid var(--border);
   background: var(--bg-raised);
   border-radius: 10px;
-  padding: 12px 36px 12px 12px;
+  padding: 12px 68px 12px 12px;
 }
 
 .trade-card-top {
@@ -229,16 +229,26 @@
   border-radius: 6px;
 }
 
-.delete-btn {
+.card-actions {
   position: absolute;
   top: 8px;
   right: 8px;
+  display: flex;
+  gap: 4px;
+}
+
+.icon-btn {
   background: none;
   border: none;
   color: var(--text);
-  font-size: 18px;
+  font-size: 16px;
   line-height: 1;
-  padding: 4px;
+  padding: 4px 6px;
+  border-radius: 6px;
+}
+
+.icon-btn:hover {
+  background: var(--bg);
 }
 
 .pnl-pos {

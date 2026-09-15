@@ -13,7 +13,6 @@ export interface Trade {
   stop_loss: number | null
   take_profit: number | null
   risk_amount: number | null
-  fees: number | null
   realized_pnl: number | null
   created_at: string
 }
