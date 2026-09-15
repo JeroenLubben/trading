@@ -140,6 +140,33 @@
   width: 100%;
 }
 
+.calc-preview {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  font-size: 13px;
+  color: var(--accent);
+  background: var(--accent-bg);
+  border-radius: 8px;
+  padding: 10px 12px;
+}
+
+.outcome-label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 13px;
+  color: var(--text);
+}
+
+.outcome-label select {
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--bg-raised);
+  color: var(--text-h);
+}
+
 .form-error {
   color: var(--pnl-neg);
   font-size: 14px;
